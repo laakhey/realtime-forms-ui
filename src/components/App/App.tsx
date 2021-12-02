@@ -1,3 +1,5 @@
+import Dashboard from '../Dashboard/Dashboard';
+import Input from '../Input/Input';
 import './App.css';
 import React from "react";
 import Login from "./Login";
@@ -14,6 +16,7 @@ function App() {
     const renderContent = () => {
         if (isLoggedIn) {
             return (<div>
+                <Dashboard formId="input-1" />
                 <h1>Welcome {username}</h1>
                 <h2>Opportunity Id: {opportunityId}</h2>
             </div>)
