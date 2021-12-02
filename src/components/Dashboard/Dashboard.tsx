@@ -1,9 +1,9 @@
-import React, {useEffect, useLayoutEffect} from "react";
-import { Form, Row, Col, Label, FormGroup, Input, Container } from "reactstrap";
-import { HTMLInputTypeAttribute, MouseEventHandler } from "react";
-import "./Dashboard.css"
-import { io } from "socket.io-client";
+import React, { HTMLInputTypeAttribute, MouseEventHandler, useEffect, useLayoutEffect, useState } from "react";
+import { Col, Form, FormGroup, Input, Label, Row } from "reactstrap";
+import { config } from "../../configs/index.config";
+import { UserEvents } from "../../events/events";
 import Nav from "../App/Nav";
+import "./Dashboard.css";
 
 interface Props {
     title?: string;
@@ -17,7 +17,43 @@ interface Props {
 }
 
 export default function Dashboard(props: Props) {
-    const socket = io('localhost:8000?user=' + props.username+'&opportunityId='+props.opportunityId);
+    const [activeUsers, setActiveUsers] = useState<any[]>([]);
+
+    const [events, setEvents] = useState<UserEvents>();
+
+    useEffect(() => {
+        if (!events) {
+            const onConnect = async () => {
+                const response = await fetch(`${config.apiUrl}/active/${props.opportunityId}`, {
+                    headers: {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "applicantion/json"
+                    }
+                });
+                const { users = [] } = await response.json();
+                setActiveUsers(users);
+            }
+
+            const onJoin = (payload: string) => {
+                const isUserPresent = activeUsers.some(user => user === payload);
+                if (!isUserPresent) setActiveUsers((prevState) => {
+                    return [...prevState, payload]
+                })
+            }
+
+            const onLeave = (payload: string) => {
+                setActiveUsers((prevUsers) => {
+                    return prevUsers.filter(user => user !== payload)
+                })
+            }
+
+            const socket = new UserEvents(props.opportunityId, props.username, onConnect, onJoin, onLeave);
+            setEvents(socket);
+            return () => {
+                socket?.leave()
+            };
+        }
+    }, [props.opportunityId, props.username, setEvents, setActiveUsers]);
 
     useLayoutEffect(() => {
         const data = Array.from(document.getElementsByClassName('dashboard-input'));
@@ -25,11 +61,15 @@ export default function Dashboard(props: Props) {
         console.log(data);
 
         data.forEach((item) => {
-            item.addEventListener('keyup',  (e: any) => {
+            item.addEventListener('keyup', (e: any) => {
                 const value = e.target.value;
 
                 if (value) {
-                    socket.emit('chat message', value);
+                    events?.sendInputEvent({
+                        formId: item.id,
+                        type: "input",
+                        value
+                    });
                 }
             });
         })
@@ -38,7 +78,7 @@ export default function Dashboard(props: Props) {
     return (
         <>
             <div className="row">
-                <Nav />
+                <Nav users={activeUsers} events={events} />
             </div>
             <h1>Welcome {props.username}</h1>
             <h2>Opportunity Id: {props.opportunityId}</h2>

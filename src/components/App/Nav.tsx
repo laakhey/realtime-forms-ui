@@ -1,10 +1,16 @@
 import React from "react";
 
-function Nav() {
+interface Props {
+    users: string[];
+    events: any;
+}
+
+function Nav(props: Props) {
 
     const onLogOut = () => {
         sessionStorage.removeItem('username');
         sessionStorage.removeItem('opportunityId');
+        props.events && props.events.leave();
         window.location.reload();
     }
 
@@ -14,16 +20,17 @@ function Nav() {
             <div id="avatar-list" className="avatar-list float-end">
                 {/*<button type="button" className="btn btn-secondary avatar" data-bs-toggle="tooltip" data-bs-placement="top"*/}
 
-                <button className="avatar" data-bs-toggle="tooltip" data-bs-placement="top" title="name of user">
-                </button>
-                <button className="avatar" data-bs-toggle="tooltip" data-bs-placement="top" title="name of user">
-                </button>
-                <button className="avatar" data-bs-toggle="tooltip" data-bs-placement="top" title="name of user">
-                </button>
-                <button className="avatar" data-bs-toggle="tooltip" data-bs-placement="top" title="name of user">
-                </button>
-                <button className="avatar" data-bs-toggle="tooltip" data-bs-placement="top" title="name of user">
-                </button>
+                {props.users && props.users.map(user => (
+                    <button
+                        key={user}
+                        className="avatar"
+                        data-bs-toggle="tooltip"
+                        data-bs-placement="top"
+                        title={user}>
+                        {/** @ts-ignore **/}
+                        {user.at(0) + user.at(-1)}
+                    </button>
+                ))}
 
             </div>
             <div className="collapse navbar-collapse float-end" id="navbarSupportedContent">
