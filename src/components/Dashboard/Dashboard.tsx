@@ -1,12 +1,15 @@
-import React, { useLayoutEffect } from "react";
+import React, {useEffect, useLayoutEffect} from "react";
 import { Form, Row, Col, Label, FormGroup, Input, Container } from "reactstrap";
 import { HTMLInputTypeAttribute, MouseEventHandler } from "react";
 import "./Dashboard.css"
 import { io } from "socket.io-client";
+import Nav from "../App/Nav";
 
 interface Props {
     title?: string;
     formId: string;
+    username: string;
+    opportunityId: string;
     type?: HTMLInputTypeAttribute | undefined;
     onClick?: MouseEventHandler<HTMLInputElement> | undefined;
     onFocus?: React.FocusEventHandler<HTMLInputElement> | undefined;
@@ -14,24 +17,31 @@ interface Props {
 }
 
 export default function Dashboard(props: Props) {
-    const socket = io('localhost:8000');
+    const socket = io('localhost:8000?user=' + props.username+'&opportunityId='+props.opportunityId);
 
     useLayoutEffect(() => {
-        const data = document.getElementsByClassName('dashboard-input');
-        //@ts-ignore
-        data.forEach(item => {
-            item.addEventListener('submit', function (e: any) {
-                e.preventDefault();
-                if (item.value) {
-                    socket.emit('chat message', item.value);
-                    item.value = '';
+        const data = Array.from(document.getElementsByClassName('dashboard-input'));
+
+        console.log(data);
+
+        data.forEach((item) => {
+            item.addEventListener('keyup',  (e: any) => {
+                const value = e.target.value;
+
+                if (value) {
+                    socket.emit('chat message', value);
                 }
             });
         })
     });
 
     return (
-        <Container>
+        <>
+            <div className="row">
+                <Nav />
+            </div>
+            <h1>Welcome {props.username}</h1>
+            <h2>Opportunity Id: {props.opportunityId}</h2>
             <Form className="dashboard-form">
                 <h1 className="text-center m-4">HLE Hackathon</h1>
                 <Row xs="2">
@@ -98,6 +108,6 @@ export default function Dashboard(props: Props) {
                     </Col>
                 </Row>
             </Form>
-        </Container>
+        </>
     )
 }
