@@ -16,14 +16,14 @@ export default function FormInput(props: Props) {
     const ref = useRef<any>();
     const [value, setValue] = useState<any>();
 
-    const disabled = props.inputState && (props.inputState?.value !== undefined || props.inputState?.value !== null);
-    const focused = props.inputState !== null && props.inputState !== undefined && props.inputState?.type !== "defocus";
+    const disabled = props.inputState && (props.inputState?.value !== undefined || props.inputState?.value !== null) && props.inputState?.type !== "blur";
+    const focused = props.inputState !== null && props.inputState !== undefined && props.inputState?.type !== "blur";
 
     return (
         <FormGroup>
             <Label for={props.id}>{props.label}</Label>
             <div style={{ position: "relative" }}>
-                {props.inputState?.user && <span className="user-name">{props.inputState.user}</span>}
+                {props.inputState?.user && props.inputState.type!=="blur" && <span className="user-name">{props.inputState.user}</span>}
                 <Input
                     innerRef={ref}
                     id={props.id}

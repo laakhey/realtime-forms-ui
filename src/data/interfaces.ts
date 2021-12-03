@@ -1,5 +1,5 @@
 export interface IFormFocusPayload {
-    type: "focus" | "defocus" | "input";
+    type: "focus" | "blur" | "input";
     formId: string;
     value?: string;
     user?: string;

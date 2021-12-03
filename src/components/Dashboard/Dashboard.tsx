@@ -1,4 +1,4 @@
-import React, { HTMLInputTypeAttribute, MouseEventHandler, useEffect, useLayoutEffect, useState } from "react";
+import React, { HTMLInputTypeAttribute, MouseEventHandler, useEffect, useState } from "react";
 import { Col, Form, Row } from "reactstrap";
 import { config } from "../../configs/index.config";
 import { IFormFocusPayload } from "../../data/interfaces";
@@ -25,12 +25,15 @@ export default function Dashboard(props: Props) {
     const [events, setEvents] = useState<UserEvents>();
 
     useEffect(() => {
+        console.log("useEffect");
         if (!events) {
+            console.log("initializing events");
             const onConnect = async () => {
+                console.log("onConnect");
                 const response = await fetch(`${config.apiUrl}/active/${props.opportunityId}`, {
                     headers: {
                         "Access-Control-Allow-Origin": "*",
-                        "Content-Type": "applicantion/json"
+                        "Content-Type": "application/json"
                     }
                 });
                 const { users = [] } = await response.json();
@@ -38,6 +41,7 @@ export default function Dashboard(props: Props) {
             }
 
             const onJoin = (payload: string) => {
+                console.log("onJoin");
                 const isUserPresent = activeUsers.some(user => user === payload);
                 if (!isUserPresent) setActiveUsers((prevState) => {
                     return [...prevState, payload]
@@ -45,6 +49,7 @@ export default function Dashboard(props: Props) {
             }
 
             const onLeave = (payload: string) => {
+                console.log("onLeave");
                 setActiveUsers((prevUsers) => {
                     return prevUsers.filter(user => user !== payload)
                 })
@@ -63,6 +68,13 @@ export default function Dashboard(props: Props) {
             }
 
             const onFocusInput = (payload: IFormFocusPayload) => {
+                console.log("onFocusInput", payload);
+                if(payload.type === "blur"){
+                    const element = document.getElementById(payload.formId);
+                    console.log(element);
+                    // inputStates["lastName"]
+
+                }
                 setInputStates((oldState) => {
                     const newState = { ...oldState };
                     const keys = Object.keys(newState);
@@ -80,35 +92,40 @@ export default function Dashboard(props: Props) {
 
             const socket = new UserEvents(props.opportunityId, props.username, onConnect, onJoin, onLeave, onFocusInput);
             setEvents(socket);
+            const data = Array.from(document.getElementsByClassName('dashboard-input'));
+
+            data.forEach((item) => {
+                item.addEventListener('keyup', (e: any) => {
+                    console.log("keyup");
+                    const value = e.target.value;
+
+                    if (value) {
+                        socket?.sendInputEvent({
+                            formId: item.id,
+                            type: "input",
+                            value
+                        });
+                    }
+                });
+                item.addEventListener('focus', () => {
+                    socket?.sendInputEvent({
+                        formId: item.id,
+                        type: "focus",
+                    })
+                })
+
+                item.addEventListener('blur', () => {
+                    socket?.sendInputEvent({
+                        formId: item.id,
+                        type: "blur",
+                    })
+                })
+            })
             return () => {
                 socket?.leave()
             };
         }
     }, [props.opportunityId, props.username, setEvents, setActiveUsers, setInputStates]);
-
-    useLayoutEffect(() => {
-        const data = Array.from(document.getElementsByClassName('dashboard-input'));
-
-        data.forEach((item) => {
-            item.addEventListener('keyup', (e: any) => {
-                const value = e.target.value;
-
-                if (value) {
-                    events?.sendInputEvent({
-                        formId: item.id,
-                        type: "input",
-                        value
-                    });
-                }
-            });
-            item.addEventListener('focus', (e: any) => {
-                events?.sendInputEvent({
-                    formId: item.id,
-                    type: "focus",
-                })
-            })
-        })
-    });
 
     return (
         <>
