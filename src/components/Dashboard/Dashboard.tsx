@@ -48,6 +48,18 @@ export default function Dashboard(props: Props) {
                 setActiveUsers((prevUsers) => {
                     return prevUsers.filter(user => user !== payload)
                 })
+                setInputStates((oldState) => {
+                    const newState = { ...oldState };
+                    const keys = Object.keys(newState);
+
+                    keys.forEach((key) => {
+                        if (newState[key].user === payload) {
+                            delete newState[key];
+                        }
+                    });
+
+                    return newState;
+                });
             }
 
             const onFocusInput = (payload: IFormFocusPayload) => {
