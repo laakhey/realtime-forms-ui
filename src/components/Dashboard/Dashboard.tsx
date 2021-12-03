@@ -1,8 +1,10 @@
 import React, { HTMLInputTypeAttribute, MouseEventHandler, useEffect, useLayoutEffect, useState } from "react";
-import { Col, Form, FormGroup, Input, Label, Row } from "reactstrap";
+import { Col, Form, Row } from "reactstrap";
 import { config } from "../../configs/index.config";
+import { IFormFocusPayload } from "../../data/interfaces";
 import { UserEvents } from "../../events/events";
 import Nav from "../App/Nav";
+import FormInput from "../Input/Input";
 import "./Dashboard.css";
 
 interface Props {
@@ -18,6 +20,7 @@ interface Props {
 
 export default function Dashboard(props: Props) {
     const [activeUsers, setActiveUsers] = useState<any[]>([]);
+    const [inputStates, setInputStates] = useState<Record<string, IFormFocusPayload>>({});
 
     const [events, setEvents] = useState<UserEvents>();
 
@@ -47,18 +50,32 @@ export default function Dashboard(props: Props) {
                 })
             }
 
-            const socket = new UserEvents(props.opportunityId, props.username, onConnect, onJoin, onLeave);
+            const onFocusInput = (payload: IFormFocusPayload) => {
+                setInputStates((oldState) => {
+                    const newState = { ...oldState };
+                    const keys = Object.keys(newState);
+
+                    keys.forEach((key) => {
+                        if (newState[key].user === payload.user) {
+                            delete newState[key];
+                        }
+                    });
+
+                    newState[payload.formId] = payload;
+                    return newState;
+                })
+            }
+
+            const socket = new UserEvents(props.opportunityId, props.username, onConnect, onJoin, onLeave, onFocusInput);
             setEvents(socket);
             return () => {
                 socket?.leave()
             };
         }
-    }, [props.opportunityId, props.username, setEvents, setActiveUsers]);
+    }, [props.opportunityId, props.username, setEvents, setActiveUsers, setInputStates]);
 
     useLayoutEffect(() => {
         const data = Array.from(document.getElementsByClassName('dashboard-input'));
-
-        console.log(data);
 
         data.forEach((item) => {
             item.addEventListener('keyup', (e: any) => {
@@ -72,6 +89,12 @@ export default function Dashboard(props: Props) {
                     });
                 }
             });
+            item.addEventListener('focus', (e: any) => {
+                events?.sendInputEvent({
+                    formId: item.id,
+                    type: "focus",
+                })
+            })
         })
     });
 
@@ -86,65 +109,49 @@ export default function Dashboard(props: Props) {
                 <h1 className="text-center m-4">HLE Hackathon</h1>
                 <Row xs="2">
                     <Col >
-                        <FormGroup>
-                            <Label for="firstName">First Name</Label>
-                            <Input
-                                id="firstName"
-                                name="firstName"
-                                placeholder="First Name"
-                                className="dashboard-input"
-                                required={true}
-                            />
-                        </FormGroup>
+                        <FormInput
+                            id="firstName"
+                            label="First Name"
+                            placeholder="First Name"
+                            inputState={inputStates["firstName"]}
+                            emitUnfocused={events?.sendInputEvent!}
+                        />
                     </Col>
                     <Col>
-                        <FormGroup>
-                            <Label for="lastName">Last Name</Label>
-                            <Input
-                                id="lastName"
-                                name="lastName"
-                                placeholder="Last Name"
-                                className="dashboard-input"
-                                required={true}
-                            />
-                        </FormGroup>
+                        <FormInput
+                            id="lastName"
+                            placeholder="Last Name"
+                            label="Last Name"
+                            inputState={inputStates["lastName"]}
+                            emitUnfocused={events?.sendInputEvent!}
+                        />
                     </Col>
                     <Col>
-                        <FormGroup>
-                            <Label for="email">Email</Label>
-                            <Input
-                                id="email"
-                                name="email"
-                                placeholder="Email"
-                                className="dashboard-input"
-                                type="email"
-                                required={true}
-                            />
-                        </FormGroup>
+                        <FormInput
+                            id="email"
+                            placeholder="Email"
+                            label="Email"
+                            inputState={inputStates["email"]}
+                            emitUnfocused={events?.sendInputEvent!}
+                        />
                     </Col>
                     <Col>
-                        <FormGroup>
-                            <Label for="contactNumber">Contact Number</Label>
-                            <Input
-                                id="contactNumber"
-                                name="contactNumber"
-                                placeholder="Contact Number"
-                                className="dashboard-input"
-                                required={true}
-                            />
-                        </FormGroup>
+                        <FormInput
+                            id="contactNumber"
+                            placeholder="Contact Number"
+                            label="Contact Number"
+                            inputState={inputStates["contactNumber"]}
+                            emitUnfocused={events?.sendInputEvent!}
+                        />
                     </Col>
                     <Col>
-                        <FormGroup>
-                            <Label for="address">Address</Label>
-                            <Input
-                                id="address"
-                                name="email"
-                                placeholder="Address"
-                                className="dashboard-input"
-                                required={true}
-                            />
-                        </FormGroup>
+                        <FormInput
+                            id="address"
+                            placeholder="Address"
+                            label="Address"
+                            inputState={inputStates["address"]}
+                            emitUnfocused={events?.sendInputEvent!}
+                        />
                     </Col>
                 </Row>
             </Form>

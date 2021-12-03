@@ -1,7 +1,8 @@
 export interface IFormFocusPayload {
     type: "focus" | "defocus" | "input";
     formId: string;
-    value: string;
+    value?: string;
+    user?: string;
 }
 
 export interface IUser {

@@ -10,11 +10,15 @@ export class UserEvents {
     private socket: Socket;
     private onJoin: SocketCb;
     private onLeave: SocketCb;
+    private onFocusInput: SocketCb;
 
-    constructor(opportunityId: string, name: string, onConnectCb: Function, onJoin: SocketCb, onLeave: SocketCb) {
+    constructor(opportunityId: string, name: string, onConnectCb: Function, onJoin: SocketCb, onLeave: SocketCb, onFocusInput: SocketCb) {
         this.onConnectCb = onConnectCb;
+
         this.onJoin = onJoin;
         this.onLeave = onLeave;
+        this.onFocusInput = onFocusInput;
+
         this.opportunityId = opportunityId;
         this.user = {
             name: name ?? "Random Name",
@@ -29,8 +33,9 @@ export class UserEvents {
     private onConnect() {
         this.socket.on("connect", () => {
             this.onConnectCb();
-            this.socket.on("JOIN", this.onJoin)
-            this.socket.on("LEAVE", this.onLeave)
+            this.socket.on("JOIN", this.onJoin);
+            this.socket.on("LEAVE", this.onLeave);
+            this.socket.on("FORM_FOCUS", this.onFocusInput);
         })
     }
 
@@ -38,15 +43,11 @@ export class UserEvents {
         this.socket.emit("JOIN", this.toSocketJson());
     }
 
-    leave() {
-        this.socket.disconnect();
-    }
-
     private connect() {
         if (!this.socket || !this.socket.connected)
             return io(
                 `${config.socketUrl}/?opportunityId=${this.opportunityId}&user=${this.user.name}`,
-                config.socketConnOpts
+                config.socketConnOpts,
             );
         return this.socket;
     }
@@ -56,6 +57,10 @@ export class UserEvents {
     }
 
     sendInputEvent(payload: IFormFocusPayload) {
-        this.socket.emit("FORM_FOCUS", payload)
+        this.socket?.emit("FORM_FOCUS", payload)
+    }
+
+    leave() {
+        this.socket.disconnect();
     }
 }

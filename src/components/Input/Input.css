@@ -1,8 +1,14 @@
-.input-wrapper {
+.focused {
+  border: 2px solid red !important;
 }
 
-.input-title {
-}
-
-.input {
+.user-name {
+    position: absolute;
+    top: -22px;
+    background-color: red;
+    color: white;
+    font-weight: bold;
+    padding: 0 6px;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
 }

@@ -1,27 +1,44 @@
-import { HTMLInputTypeAttribute, MouseEventHandler } from "react";
+import { useRef, useState } from "react";
+import { FormGroup, Input, Label } from "reactstrap";
+import { IFormFocusPayload } from "../../data/interfaces";
+import { classNames } from "../../utils/utils";
 import "./Input.css";
 
 interface Props {
-    title?: string;
-    formId: string;
-    type?: HTMLInputTypeAttribute | undefined;
-    onClick?: MouseEventHandler<HTMLInputElement> | undefined;
-    onFocus?: React.FocusEventHandler<HTMLInputElement> | undefined;
-    onChange?: React.ChangeEventHandler<HTMLInputElement> | undefined;
+    label: string;
+    id: string;
+    inputState?: IFormFocusPayload;
+    placeholder: string;
+    emitUnfocused: (payload: IFormFocusPayload) => void;
 }
 
-export default function Input(props: Props) {
+export default function FormInput(props: Props) {
+    const ref = useRef<any>();
+    const [value, setValue] = useState<any>();
+
+    const disabled = props.inputState && (props.inputState?.value !== undefined || props.inputState?.value !== null);
+    const focused = props.inputState !== null && props.inputState !== undefined && props.inputState?.type !== "defocus";
+
     return (
-        <div className="input-wrapper">
-            {props.title && <p className="input-title">{props.title}</p>}
-            <input
-                className="input"
-                type={props.type}
-                onClick={props.onClick}
-                onChange={props.onChange}
-                onFocus={props.onFocus}
-                id={props.formId}
-            />
-        </div>
+        <FormGroup>
+            <Label for={props.id}>{props.label}</Label>
+            <div style={{ position: "relative" }}>
+                {props.inputState?.user && <span className="user-name">{props.inputState.user}</span>}
+                <Input
+                    innerRef={ref}
+                    id={props.id}
+                    name={props.id}
+                    placeholder={props.placeholder}
+                    value={props.inputState?.value ?? value}
+                    disabled={disabled}
+                    onChange={(e) => setValue(e.currentTarget.value)}
+                    className={classNames({
+                        "dashboard-input": true,
+                        "focused": focused,
+                    })}
+                    required={true}
+                />
+            </div>
+        </FormGroup>
     )
 }
