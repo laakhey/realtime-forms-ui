@@ -163,6 +163,55 @@ export default function Dashboard(props: Props) {
                             label="Address"
                         />
                     </Col>
+                    <Col>
+                        <FormInput
+                            id="input1"
+                            placeholder="Input 1"
+                            label="Input 1"
+                        />
+                    </Col>
+                    <Col>
+                        <FormInput
+                            id="input2 "
+                            placeholder="Input 2"
+                            label="Input 2"
+                        />
+                    </Col>
+                    <Col>
+                        <FormInput
+                            id="input3"
+                            placeholder="Input 3"
+                            label="Input 3"
+                        />
+                    </Col>
+                    <Col>
+                        <FormInput
+                            id="input4"
+                            placeholder="Input 4"
+                            label="Input 4"
+                        />
+                    </Col>
+                    <Col>
+                        <FormInput
+                            id="input5"
+                            placeholder="Input 5"
+                            label="Input 5"
+                        />
+                    </Col>
+                    <Col>
+                        <FormInput
+                            id="input6"
+                            placeholder="Input 6"
+                            label="Input 6"
+                        />
+                    </Col>
+                    <Col>
+                        <FormInput
+                            id="input7"
+                            placeholder="Input 7"
+                            label="Input 7"
+                        />
+                    </Col>
                 </Row>
             </Form>
         </>
