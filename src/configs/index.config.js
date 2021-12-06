@@ -1,5 +1,5 @@
 export const config = {
-  socketUrl: "localhost:8000",
+  socketUrl: "https://realtime-forms-api.herokuapp.com",
   socketConnOpts: {},
-  apiUrl: "http://localhost:8000"
+  apiUrl: "https://realtime-forms-api.herokuapp.com"
 };
